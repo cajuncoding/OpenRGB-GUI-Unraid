@@ -1,3 +1,5 @@
+ARG OPENRGB_VERSION
+
 FROM debian:bullseye AS builder
 
 RUN apt update && \
@@ -6,7 +8,6 @@ RUN apt update && \
 RUN git clone https://gitlab.com/CalcProgrammer1/OpenRGB /usr/app
 WORKDIR /usr/app
 
-ARG OPENRGB_VERSION
 RUN echo $OPENRGB_VERSION
 RUN git checkout $OPENRGB_VERSION
 
@@ -18,6 +19,11 @@ FROM jlesage/baseimage-gui:debian-11-v4
 ENV APP_NAME="OpenRGB"
 ENV APP_VERSION=$OPENRGB_VERSION
 ENV KEEP_APP_RUNNING=1
+
+# Generate and install favicons.
+RUN \
+    APP_ICON_URL=https://gitlab.com/uploads/-/system/project/avatar/10582521/OpenRGB.png && \
+    install_app_icon.sh "$APP_ICON_URL"
 
 RUN apt update && \
     apt install -y i2c-tools libusb-1.0-0 libhidapi-dev libmbedtls-dev libqt5gui5
