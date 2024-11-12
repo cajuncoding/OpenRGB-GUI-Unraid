@@ -9,6 +9,7 @@ Images are published to DockerHub and versioned to match OpenRGB releases: https
 ## Images
 
 | Dockerfile        | Description |
+| ----------------- | ----------- |
 | Dockerfile.server | Based on Debian bookworm, only includes running a headless OpenRGB server.  Must forward port 6742 and be connected to from a separate GUI running on another machine. |
 | Dockerfile.gui    | Based on jlesage/baseimage-gui includes the GUI version of OpenRGB and the server.  Supports forwarding port 5800 to access the OpenRGB GUI directly.  Can also still forward 6742 and access the server with a remote GUI.  Must also set the USER_ID and GROUP_ID values to a user/group that has access to the RGB devices you want to control (base image defaults to 1000), or 0 if you want to be a cowboy 🤠 |
 
