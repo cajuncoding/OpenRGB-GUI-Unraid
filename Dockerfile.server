@@ -1,4 +1,4 @@
-FROM debian:bookworm AS builder
+FROM debian:12.11 AS builder
 
 RUN apt update && \
     apt install -y git build-essential qtcreator qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libusb-1.0-0-dev libhidapi-dev pkgconf libmbedtls-dev qttools5-dev-tools
@@ -13,7 +13,7 @@ RUN git checkout $OPENRGB_VERSION
 RUN qmake OpenRGB.pro
 RUN make -j8
 
-FROM debian:bookworm
+FROM debian:12.11 AS server
 
 RUN apt update && \
     apt install -y i2c-tools libusb-1.0-0 libhidapi-dev libmbedtls-dev libqt5gui5
