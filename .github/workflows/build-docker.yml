@@ -1,0 +1,99 @@
+name: Build Docker Images
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  DH_REGISTRY: docker.io
+  NAMESPACE: swensorm
+  OPENRGB_VERSION: release_0.9
+  OPENRGB_SEMVER: 0.9
+  DEBIAN_BASE_VERSION: 12.11
+  GUI_BASE_VERSION: v4.9.0
+
+jobs:
+  build-server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DH_REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata for server image
+        id: meta-server
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DH_REGISTRY }}/${{ env.NAMESPACE }}/openrgb
+          tags: |
+            type=ref,event=branch
+            type=raw,value=openrgb-${{ env.OPENRGB_SEMVER }}-server,enable={{is_default_branch}}
+            type=raw,value=openrgb-${{ env.OPENRGB_SEMVER }}-server-${{ env.DEBIAN_BASE_VERSION }},enable={{is_default_branch}}
+
+      - name: Build and push server image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.server
+          platforms: linux/amd64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta-server.outputs.tags }}
+          labels: ${{ steps.meta-server.outputs.labels }}
+          build-args: |
+            OPENRGB_VERSION=${{ env.OPENRGB_VERSION }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-gui:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DH_REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata for GUI image
+        id: meta-gui
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DH_REGISTRY }}/${{ env.NAMESPACE }}/openrgb
+          tags: |
+            type=ref,event=branch
+            type=raw,value=openrgb-${{ env.OPENRGB_SEMVER }}-gui,enable={{is_default_branch}}
+            type=raw,value=openrgb-${{ env.OPENRGB_SEMVER }}-gui-${{ env.GUI_BASE_VERSION }},enable={{is_default_branch}}
+
+      - name: Build and push GUI image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.gui
+          platforms: linux/amd64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta-gui.outputs.tags }}
+          labels: ${{ steps.meta-gui.outputs.labels }}
+          build-args: |
+            OPENRGB_VERSION=${{ env.OPENRGB_VERSION }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
