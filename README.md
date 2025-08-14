@@ -10,11 +10,14 @@ Please see the [Warnings](https://gitlab.com/CalcProgrammer1/OpenRGB#warning), [
 
 ## Images
 
-Images are published to DockerHub.  They are versioned to match OpenRGB releases: https://hub.docker.com/r/swensorm/openrgb but, as always, are encouraged to build your own after inspecing the Dockerfiles since they are not offical.
+Images are published to DockerHub and GitHub.  Due to the longer release schedule of OpenRGB, they are versioned to include both OpenRGB release and the baseimage version - e.g. `openrgb-{openrgb-version}-baseimage-{baseimage-version}`.
+
+https://hub.docker.com/r/swensorm/openrgb
+
 
 | Dockerfile        | Description |
 | ----------------- | ----------- |
-| Dockerfile.server | Based on Debian bookworm, only includes running a headless OpenRGB server.  Must forward port 6742 and be connected to from a separate GUI running on another machine. |
+| Dockerfile.server | Based on Debian bookworm, only includes running a headless OpenRGB server.  Must forward port 6742 and be connected to from a separate GUI running on another machine.  Lighter weight than the GUI and can be used to load existing .orp files on a schedule with cron. |
 | Dockerfile.gui    | Based on jlesage/baseimage-gui includes the GUI version of OpenRGB and the server.  Supports forwarding port 5800 to access the OpenRGB GUI directly.  Can also still forward 6742 and access the server with a remote GUI.  Must also set the USER_ID and GROUP_ID values to a user/group that has access to the RGB devices you want to control (base image defaults to 1000) |
 
 ## Compose

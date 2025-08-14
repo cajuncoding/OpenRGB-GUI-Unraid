@@ -22,6 +22,11 @@ WORKDIR /usr/app
 
 COPY --from=builder /usr/app/openrgb .
 
+ENV OPENRGB_SERVER_PORT=6742
+
+# Expose port for OpenRGB Server
+EXPOSE 6742
+
 ENTRYPOINT [ "/usr/app/openrgb" ]
 
-CMD [ "--server" ]
+CMD [ "--server", "--server-port", "$OPENRGB_SERVER_PORT" ]
