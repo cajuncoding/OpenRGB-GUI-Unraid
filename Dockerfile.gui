@@ -32,4 +32,4 @@ RUN apt update && \
 WORKDIR /usr/app
 
 COPY --from=builder /usr/app/openrgb .
-COPY startapp.sh /startapp.sh
+COPY --chmod=0755 startapp.sh /startapp.sh
