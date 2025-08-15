@@ -1,40 +1,51 @@
 FROM debian:12.11 AS builder
 
-RUN apt update && \
-    apt install -y git build-essential qtcreator qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libusb-1.0-0-dev libhidapi-dev pkgconf libmbedtls-dev qttools5-dev-tools
+ARG OPENRGB_VERSION
 
-RUN git clone https://gitlab.com/CalcProgrammer1/OpenRGB /usr/app
 WORKDIR /usr/app
 
-ARG OPENRGB_VERSION
-RUN echo $OPENRGB_VERSION
-RUN git checkout $OPENRGB_VERSION
-
-RUN qmake OpenRGB.pro
-RUN make -j8
+RUN apt update && \
+    apt install -y \
+        git \
+        build-essential \
+        qtcreator \
+        qtbase5-dev \
+        qtchooser \
+        qt5-qmake \
+        qtbase5-dev-tools \
+        libusb-1.0-0-dev \
+        libhidapi-dev \
+        pkgconf \
+        libmbedtls-dev \
+        qttools5-dev-tools \
+    && \
+    git clone https://gitlab.com/CalcProgrammer1/OpenRGB /usr/app && \
+    git checkout $OPENRGB_VERSION && \
+    qmake OpenRGB.pro && \
+    make -j8
 
 FROM jlesage/baseimage-gui:debian-12-v4.9.0 AS gui
 
 ARG OPENRGB_VERSION
 
-ENV APP_NAME="OpenRGB"
-ENV APP_VERSION=$OPENRGB_VERSION
-ENV KEEP_APP_RUNNING=1
-
-# Generate and install favicons.
-RUN \
-    APP_ICON_URL=https://gitlab.com/uploads/-/system/project/avatar/10582521/OpenRGB.png && \
-    install_app_icon.sh "$APP_ICON_URL"
-
-RUN apt update && \
-    apt install -y i2c-tools libusb-1.0-0 libhidapi-dev libmbedtls-dev libqt5gui5
-
 WORKDIR /usr/app
+
+ENV \
+    APP_NAME="OpenRGB" \
+    APP_VERSION=$OPENRGB_VERSION \
+    KEEP_APP_RUNNING=1 \
+    OPENRGB_SERVER_PORT=6742
+
+RUN \
+    # Generate and install favicons
+    APP_ICON_URL=https://gitlab.com/uploads/-/system/project/avatar/10582521/OpenRGB.png && \
+    install_app_icon.sh "$APP_ICON_URL" && \
+    # Install runtime dependencies
+    apt update && \
+    apt install -y i2c-tools libusb-1.0-0 libhidapi-dev libmbedtls-dev libqt5gui5
 
 COPY --from=builder /usr/app/openrgb .
 COPY --chmod=0755 startapp.sh /startapp.sh
-
-ENV OPENRGB_SERVER_PORT=6742
 
 # Expose port for OpenRGB Server
 EXPOSE 6742

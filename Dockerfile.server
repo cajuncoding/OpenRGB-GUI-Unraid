@@ -1,28 +1,39 @@
 FROM debian:12.11 AS builder
 
-RUN apt update && \
-    apt install -y git build-essential qtcreator qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libusb-1.0-0-dev libhidapi-dev pkgconf libmbedtls-dev qttools5-dev-tools
+ARG OPENRGB_VERSION
 
-RUN git clone https://gitlab.com/CalcProgrammer1/OpenRGB /usr/app
 WORKDIR /usr/app
 
-ARG OPENRGB_VERSION
-RUN echo $OPENRGB_VERSION
-RUN git checkout $OPENRGB_VERSION
-
-RUN qmake OpenRGB.pro
-RUN make -j8
+RUN apt update && \
+    apt install -y \
+        git \
+        build-essential \
+        qtcreator \
+        qtbase5-dev \
+        qtchooser \
+        qt5-qmake \
+        qtbase5-dev-tools \
+        libusb-1.0-0-dev \
+        libhidapi-dev \
+        pkgconf \
+        libmbedtls-dev \
+        qttools5-dev-tools \
+    && \
+    git clone https://gitlab.com/CalcProgrammer1/OpenRGB . && \
+    git checkout $OPENRGB_VERSION && \
+    qmake OpenRGB.pro && \
+    make -j8
 
 FROM debian:12.11 AS server
+
+WORKDIR /usr/app
+
+ENV OPENRGB_SERVER_PORT=6742
 
 RUN apt update && \
     apt install -y i2c-tools libusb-1.0-0 libhidapi-dev libmbedtls-dev libqt5gui5
 
-WORKDIR /usr/app
-
 COPY --from=builder /usr/app/openrgb .
-
-ENV OPENRGB_SERVER_PORT=6742
 
 # Expose port for OpenRGB Server
 EXPOSE 6742
