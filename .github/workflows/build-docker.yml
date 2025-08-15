@@ -49,6 +49,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: changes
     if: needs.changes.outputs.server == 'true'
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -101,6 +104,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [changes, build-server]
     if: needs.changes.outputs.gui == 'true' && (success() || failure())
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
