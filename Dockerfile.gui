@@ -41,8 +41,16 @@ RUN \
     APP_ICON_URL=https://gitlab.com/uploads/-/system/project/avatar/10582521/OpenRGB.png && \
     install_app_icon.sh "$APP_ICON_URL" && \
     # Install runtime dependencies
-    apt update && \
-    apt install -y i2c-tools libusb-1.0-0 libhidapi-dev libmbedtls-dev libqt5gui5
+	apt update && \
+    apt install -y \
+        i2c-tools \
+        libusb-1.0-0 \
+        libhidapi-dev \
+        libmbedtls-dev \
+        libqt5gui5 \
+        libopenal1
+	&& \
+    rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /usr/app/openrgb .
 COPY --chmod=0755 startapp.sh /startapp.sh
