@@ -1,6 +1,6 @@
 FROM debian:12.11 AS builder
 
-ARG OPENRGB_VERSION
+ARG OPENRGB_VERSION=release_0.9
 
 WORKDIR /usr/app
 
@@ -41,19 +41,25 @@ RUN \
     APP_ICON_URL=https://gitlab.com/uploads/-/system/project/avatar/10582521/OpenRGB.png && \
     install_app_icon.sh "$APP_ICON_URL" && \
     # Install runtime dependencies
-	apt update && \
+    apt update && \
     apt install -y \
         i2c-tools \
         libusb-1.0-0 \
         libhidapi-dev \
         libmbedtls-dev \
         libqt5gui5 \
-        libopenal1
-	&& \
+        libopenal1 \
+        curl \
+        bash \
+    && \
     rm -rf /var/lib/apt/lists/*
 
+# Copy OpenRGB from compiled artifact(s)...
 COPY --from=builder /usr/app/openrgb .
+
+# Copy startup and helper scripts into the image...
 COPY --chmod=0755 startapp.sh /startapp.sh
+COPY --chmod=0755 init-openrgb-plugins.sh /init-openrgb-plugins.sh
 
 # Expose port for OpenRGB Server
 EXPOSE 6742

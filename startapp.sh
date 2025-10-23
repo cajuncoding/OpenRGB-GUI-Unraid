@@ -1,4 +1,10 @@
-#!/bin/sh
+#!/bin/bash
+set -euo pipefail
+
+# Run plugin initialization
+/init-openrgb-plugins.sh
+
+# Now start OpenRGB
 exec /usr/app/openrgb \
     --gui \
     --server \
