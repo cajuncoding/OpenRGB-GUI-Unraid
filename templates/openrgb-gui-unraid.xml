@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>OpenRGB-GUI-Unraid</Name>
+  <Repository>openrgb-gui-unraid:latest</Repository>
+  <Registry/>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>bash</Shell>
+  <Privileged>true</Privileged>
+  <Support/>
+  <Project/>
+  <Overview>An implementation of the openrgb-docker container project for Unraid. &#xD;
+&#xD;
+Github Project: https://github.com/cajuncoding/OpenRGB-GUI-Unraid&#xD;
+forked from original Github Project: https://github.com/swensorm/openrgb-docker&#xD;
+&#xD;
+OpenRGB is an Open source RGB lighting control that doesn't depend on manufacturer software with a broad list of supported devices including motherboards memory, USB devices, etc. And updated versions of OpenRGB automatically scan and discover hardware greatly simplifying getting this running.&#xD;
+&#xD;
+However, you may still need to ensure that Unraid has loaded the correct drivers for your system:&#xD;
+https://github.com/cajuncoding/OpenRGB-GUI-Unraid?tab=readme-ov-file#devices&#xD;
+&#xD;
+This docker container provides access to OpenRGB with a GUI in a browser enabling control over RGB lighting from Unraid. Which can be very useful if you want to disable your RGB because it's a NAS box for you and you don't like eye candy. Or if you use Unraid for many things, like most do, and want to have your Unraid server box react to events using local scripts, Unraid API, HomeAssistant integration, etc.</Overview>
+  <Category/>
+  <WebUI>http://[IP]:[PORT:5801]/</WebUI>
+  <TemplateURL/>
+  <Icon>https://github.com/cajuncoding/OpenRGB-GUI-Unraid/blob/main/OpenRGB.png?raw=true</Icon>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled>1761200771</DateInstalled>
+  <DonateText/>
+  <DonateLink/>
+  <Requires>NOTE: For Unraid it seems that the container must be run in Privelege mode as well as using the Root User! Any attempts to restrict the access resulted in OpenRGB not finding my devices on my MSI B450 Mortar Titanium motherboard.&#xD;
+&#xD;
+The default values for USER_ID &amp;amp; GROUP_ID should normally both be 0 (Zero) which map to the root user of Unraid. If you have issues you can run the `id root` command in your Unraid terminal to confirm the correct values for root user and update them if necessary.</Requires>
+  <Config Name="TigerVNC" Target="5900" Default="" Mode="tcp" Description="" Type="Port" Display="always" Required="false" Mask="false">5901</Config>
+  <Config Name="WebVNC" Target="5800" Default="" Mode="tcp" Description="" Type="Port" Display="always" Required="false" Mask="false">5801</Config>
+  <Config Name="Config" Target="/config" Default="" Mode="rw" Description="" Type="Path" Display="always" Required="false" Mask="false">/mnt/user/appdata/openrgb-gui-unraid</Config>
+  <Config Name="USER ID" Target="USER_ID" Default="" Mode="" Description="" Type="Variable" Display="always" Required="false" Mask="false">0</Config>
+  <Config Name="GROUP ID" Target="GROUP_ID" Default="" Mode="" Description="" Type="Variable" Display="always" Required="false" Mask="false">0</Config>
+  <Config Name="PLUGIN URLS (Pipe Delimited)" Target="PLUGIN_URLS" Default="" Mode="" Description="" Type="Variable" Display="always" Required="false" Mask="false">https://codeberg.org/OpenRGB/OpenRGBEffectsPlugin/releases/download/release_0.9/OpenRGBEffectsPlugin_0.9_Bookworm_64_f1411e1.so</Config>
+  <TailscaleStateDir/>
+</Container>
