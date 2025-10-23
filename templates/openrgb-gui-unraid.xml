@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <Container version="2">
   <Name>OpenRGB-GUI-Unraid</Name>
-  <Repository>openrgb-gui-unraid:latest</Repository>
+  <Repository>cajuncoding/openrgb-gui-unraid:latest</Repository>
   <Registry/>
   <Network>bridge</Network>
   <MyIP/>
