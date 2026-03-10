@@ -45,10 +45,14 @@ RUN \
     apt install -y \
         i2c-tools \
         libusb-1.0-0 \
-        libhidapi-dev \
+        libhidapi-hidraw0 \
         libmbedtls-dev \
         libqt5gui5 \
         libopenal1 \
+        libpipewire-0.3-0 \
+        libspa-0.2-modules \
+        libpulse0 \
+        libcanberra0 \
         curl \
         bash \
     && \
