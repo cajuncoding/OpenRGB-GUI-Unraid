@@ -1,6 +1,6 @@
 FROM debian:12.11 AS builder
 
-ARG OPENRGB_VERSION=release_0.9
+ARG OPENRGB_VERSION=release_candidate_1.0rc2
 
 WORKDIR /usr/app
 

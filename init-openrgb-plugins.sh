@@ -2,7 +2,7 @@
 set -u  # no -e or -o pipefail to allow graceful failure handling
 
 PLUGIN_DEST="${PLUGIN_DEST:-/config/xdg/config/OpenRGB/plugins}"
-DEFAULT_PLUGIN="https://codeberg.org/OpenRGB/OpenRGBEffectsPlugin/releases/download/release_0.9/OpenRGBEffectsPlugin_0.9_Bookworm_64_f1411e1.so"
+DEFAULT_PLUGIN="https://codeberg.org/OpenRGB/OpenRGBEffectsPlugin/releases/download/release_candidate_1.0rc2/OpenRGBEffectsPlugin_1.0rc2_Linux_amd64_415dc20.so"
 PLUGIN_URLS="${PLUGIN_URLS:-$DEFAULT_PLUGIN}"
 
 log() {
