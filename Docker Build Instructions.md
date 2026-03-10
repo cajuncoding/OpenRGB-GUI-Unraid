@@ -6,3 +6,6 @@
 2. Run `Build-OpenRGB.ps1`
   - NOTE: Docker Desktop must be running! Otherwise you will get error about `ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; . . .` 
   - You will be prompted to select the OpenRGB version to build and other details...
+  - Commands:
+	- Local Build Only: `.\Build-OpenRGB.ps1`
+	- Build and Publish: `.\Build-OpenRGB.ps1 -Push -AlsoTagLatest`
