@@ -21,6 +21,11 @@ Please see the [Warnings](https://gitlab.com/CalcProgrammer1/OpenRGB#warning), [
 
 Running any container with Privleged Mode On AND User/Group set to root (0) is the same as running the container bare metal on the host and gives it full access to your system. Take note and act accordingly!
 
+## Docker Hub & Unraid Docker Template
+Docker containers are published to Docker Hub at [https://hub.docker.com/repository/docker/cajuncoding/openrgb-gui-unraid/general](https://hub.docker.com/repository/docker/cajuncoding/openrgb-gui-unraid/general)
+
+The Unraid Docker templates are published and loaded by Unraid from: []()
+
 ## 🚀 Features
 - Includes Web VNC GUI
 - OpenRGB Plugins bootstrap (via `init-openrgb-plugins.sh`) with logging
