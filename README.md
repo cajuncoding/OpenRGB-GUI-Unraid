@@ -24,7 +24,7 @@ Running any container with Privleged Mode On AND User/Group set to root (0) is t
 ## Docker Hub & Unraid Docker Template
 Docker containers are published to Docker Hub at [https://hub.docker.com/repository/docker/cajuncoding/openrgb-gui-unraid/general](https://hub.docker.com/repository/docker/cajuncoding/openrgb-gui-unraid/general)
 
-The Unraid Docker templates are published and loaded by Unraid from: []()
+The Unraid Docker templates are published and loaded by Unraid from: [https://github.com/cajuncoding/Unraid-Templates](https://github.com/cajuncoding/Unraid-Templates)
 
 ## 🚀 Features
 - Includes Web VNC GUI
