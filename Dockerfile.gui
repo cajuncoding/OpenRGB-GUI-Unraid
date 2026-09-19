@@ -1,4 +1,4 @@
-FROM debian:12.11 AS builder
+FROM debian:13 AS builder
 
 ARG OPENRGB_VERSION=release_candidate_1.0rc2
 
@@ -21,8 +21,10 @@ RUN apt update && \
     && \
     git clone https://gitlab.com/CalcProgrammer1/OpenRGB /usr/app && \
     git checkout $OPENRGB_VERSION && \
+    echo "HIDAPI Version:" && \
+    pkg-config --modversion hidapi-hidraw && \
     qmake OpenRGB.pro && \
-    make -j8
+    make -j$(nproc)
 
 FROM jlesage/baseimage-gui:debian-12-v4.9.0 AS gui
 
@@ -42,11 +44,10 @@ RUN \
     install_app_icon.sh "$APP_ICON_URL" && \
     # Install runtime dependencies
     apt update && \
-    apt install -y \
+    apt install -y --no-install-recommends \
         i2c-tools \
         libusb-1.0-0 \
         libhidapi-hidraw0 \
-        libmbedtls-dev \
         libqt5gui5 \
         libopenal1 \
         libpipewire-0.3-0 \
