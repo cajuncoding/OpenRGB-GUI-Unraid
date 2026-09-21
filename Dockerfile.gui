@@ -1,70 +1,94 @@
-FROM debian:13 AS builder
-
-ARG OPENRGB_VERSION=release_candidate_1.0rc2
-
-WORKDIR /usr/app
-
-RUN apt update && \
-    apt install -y \
-        git \
-        build-essential \
-        qtcreator \
-        qtbase5-dev \
-        qtchooser \
-        qt5-qmake \
-        qtbase5-dev-tools \
-        libusb-1.0-0-dev \
-        libhidapi-dev \
-        pkgconf \
-        libmbedtls-dev \
-        qttools5-dev-tools \
-    && \
-    git clone https://gitlab.com/CalcProgrammer1/OpenRGB /usr/app && \
-    git checkout $OPENRGB_VERSION && \
-    echo "HIDAPI Version:" && \
-    pkg-config --modversion hidapi-hidraw && \
-    qmake OpenRGB.pro && \
-    make -j$(nproc)
-
 FROM jlesage/baseimage-gui:debian-12-v4.9.0 AS gui
 
-ARG OPENRGB_VERSION
+# ------------------------------------------------------------------------------
+# BUILD ARGUMENTS & VERSION SELECTION
+# 
+# Handles Version Input Formats:
+# Accepts raw versions (e.g., '1.0' or '1.0rc3.1') OR full tags (e.g., 
+# 'release_1.0' or 'release_candidate_1.0rc3.1').
+#
+# Codeberg API Query & Asset Matching:
+# Queries Codeberg API dynamically for $TAG_NAME to discover and download 
+# the exact Debian 12 (bookworm) amd64 .deb asset URL.
+# ------------------------------------------------------------------------------
+ARG OPENRGB_VERSION=release_1.0
+ARG HIDAPI_VERSION=0.15.0
 
-WORKDIR /usr/app
-
-ENV \
+# Prevent debconf interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive \
     APP_NAME="OpenRGB" \
     APP_VERSION=$OPENRGB_VERSION \
     KEEP_APP_RUNNING=1 \
     OPENRGB_SERVER_PORT=6742
 
+WORKDIR /usr/app
+
 RUN \
-    # Generate and install favicons
-    APP_ICON_URL=https://gitlab.com/uploads/-/system/project/avatar/10582521/OpenRGB.png && \
-    install_app_icon.sh "$APP_ICON_URL" && \
-    # Install runtime dependencies
-    apt update && \
-    apt install -y --no-install-recommends \
+    # 1. Install minimal network dependencies required for API lookup
+    apt-get update && \
+    apt-get install -y --no-install-recommends curl ca-certificates && \
+    \
+    # 2. EARLY FAIL FAST CHECK: Sanitize version input and resolve URL BEFORE main dependencies
+    RAW_VERSION=$(echo "$OPENRGB_VERSION" | sed -E 's/^release(_candidate)?_//') && \
+    TAG_NAME=$(if echo "$RAW_VERSION" | grep -qi "rc"; then echo "release_candidate_${RAW_VERSION}"; else echo "release_${RAW_VERSION}"; fi) && \
+    OPENRGB_DEB_URL=$(curl -s "https://codeberg.org/api/v1/repos/OpenRGB/OpenRGB/releases/tags/${TAG_NAME}" | grep -o 'https://[^"]*amd64_bookworm[^"]*\.deb' | head -n 1) && \
+    \
+    # Output resolved release asset info to build logs
+    echo "=========================================================================" && \
+    echo "[INFO] Resolved Release Tag : '${TAG_NAME}'" && \
+    echo "[INFO] Found OpenRGB DEB URL: '${OPENRGB_DEB_URL}'" && \
+    echo "=========================================================================" && \
+    \
+    if [ -z "$OPENRGB_DEB_URL" ]; then \
+        echo "ERROR: Could not locate OpenRGB .deb asset for tag: '${TAG_NAME}'" && \
+        echo "Please verify that OPENRGB_VERSION=${OPENRGB_VERSION} exists on Codeberg." && \
+        echo "=========================================================================" && \
+        exit 1; \
+    fi && \
+    \
+    # 3. Install full application runtime dependencies (Qt6 Core/GUI/Widgets/DBus/OpenGL/Core5Compat/Network/Xml/PrintSupport)
+    apt-get install -y --no-install-recommends \
         i2c-tools \
         libusb-1.0-0 \
-        libhidapi-hidraw0 \
-        libqt5gui5 \
+        libqt6widgets6 \
+        libqt6gui6 \
+        libqt6core6 \
+        libqt6dbus6 \
+        libqt6opengl6 \
+        libqt6core5compat6 \
+        libqt6network6 \
+        libqt6xml6 \
+        libqt6printsupport6 \
+        libmbedcrypto7 \
+        libmbedtls14 \
+        libmbedx509-1 \
         libopenal1 \
         libpipewire-0.3-0 \
         libspa-0.2-modules \
         libpulse0 \
         libcanberra0 \
-        curl \
-        bash \
-    && \
-    rm -rf /var/lib/apt/lists/*
+        bash && \
+    \
+    # 4. Generate and install favicons for the jlesage GUI interface
+    APP_ICON_URL="https://gitlab.com/uploads/-/system/project/avatar/10582521/OpenRGB.png" && \
+    install_app_icon.sh "$APP_ICON_URL" && \
+    \
+    # 5. Fetch required HIDAPI hotplug dependencies matching exact asset naming scheme
+    curl -fsSL -o /tmp/libhidapi-hidraw0.deb "https://codeberg.org/OpenRGB/hidapi-hotplug/releases/download/hidapi-hotplug-${HIDAPI_VERSION}/libhidapi-hotplug-hidraw0_${HIDAPI_VERSION}-1_bookworm_amd64.deb" && \
+    curl -fsSL -o /tmp/libhidapi-libusb0.deb "https://codeberg.org/OpenRGB/hidapi-hotplug/releases/download/hidapi-hotplug-${HIDAPI_VERSION}/libhidapi-hotplug-libusb0_${HIDAPI_VERSION}-1_bookworm_amd64.deb" && \
+    \
+    # 6. Download the validated OpenRGB package URL
+    curl -fsSL -o /tmp/openrgb.deb "$OPENRGB_DEB_URL" && \
+    \
+    # 7. Install downloaded .deb packages
+    apt-get install -y --no-install-recommends /tmp/libhidapi-hidraw0.deb /tmp/libhidapi-libusb0.deb /tmp/openrgb.deb && \
+    \
+    # 8. Cleanup temporary installer files and APT lists
+    rm -rf /tmp/*.deb /var/lib/apt/lists/*
 
-# Copy OpenRGB from compiled artifact(s)...
-COPY --from=builder /usr/app/openrgb .
-
-# Copy startup and helper scripts into the image...
+# Copy startup and helper scripts into the image
 COPY --chmod=0755 startapp.sh /startapp.sh
 COPY --chmod=0755 init-openrgb-plugins.sh /init-openrgb-plugins.sh
 
-# Expose port for OpenRGB Server
+# Expose port for OpenRGB SDK Server
 EXPOSE 6742
